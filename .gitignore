@@ -1,4 +1,5 @@
 __pycache__/
+*.egg-info/
 
 *.so
 *.dSYM
@@ -6,3 +7,7 @@ __pycache__/
 
 16cyga/FQ/
 16cyga/SD/
+
+build/
+
+.python-version
