@@ -1,12 +1,9 @@
 import numpy as np
-import supportGlitch as sg
-import utils_general as ug
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import seaborn as sns
-
-
+from .supportGlitch import smoothComponent, averageAmplitudes, totalGlitchSignal 
+from .utils_general import loadFit, medianAndErrors, correlation_from_covariance
 
 #-----------------------------------------------------------------------------------------
 def plot_fitSummary(path):
@@ -25,7 +22,7 @@ def plot_fitSummary(path):
 #-----------------------------------------------------------------------------------------
 
     # Load data
-    header, obsData, fitData, rtoData = ug.loadFit(path + "fitData.hdf5")
+    header, obsData, fitData, rtoData = loadFit(path + "fitData.hdf5")
     (method, npoly_params, nderiv, regu_param, tol_grad, n_guess, tauhe, 
         dtauhe, taucz, dtaucz) = header
     freq, num_of_n, delta_nu, vmin, vmax, freqDif2, icov = obsData
@@ -44,10 +41,10 @@ def plot_fitSummary(path):
     Ahe_rln = np.zeros(nfit_rln)
     Acz_rln = np.zeros(nfit_rln)
     for i in range(nfit_rln):
-        Acz_rln[i], Ahe_rln[i] = sg.averageAmplitudes(
+        Acz_rln[i], Ahe_rln[i] = averageAmplitudes(
             param_rln[i, :], vmin, vmax, delta_nu=delta_nu, method=method
         )
-    Acz_orig, Ahe_orig = sg.averageAmplitudes(
+    Acz_orig, Ahe_orig = averageAmplitudes(
         param[-1, :], vmin, vmax, delta_nu=delta_nu, method=method
     )
 
@@ -87,7 +84,7 @@ def plot_fitSummary(path):
         nmode = freq.shape[0]
         obsSignal = np.zeros(nmode)
         for i in range(nmode):
-            obsSignal[i] = freq[i, 2] - sg.smoothComponent(
+            obsSignal[i] = freq[i, 2] - smoothComponent(
                 param[-1, :], 
                 l=freq[i, 0].astype(int), 
                 n=freq[i, 1].astype(int), 
@@ -108,7 +105,7 @@ def plot_fitSummary(path):
             n1 = n2    
 
         xnu = np.linspace(xmin, xmax, 501)
-        modSignal = sg.totalGlitchSignal(xnu, param[-1, :])
+        modSignal = totalGlitchSignal(xnu, param[-1, :])
         plt.plot(xnu, modSignal, '-', lw=2, color=colorList[-1])
 
     # Fitting second differences
@@ -122,7 +119,7 @@ def plot_fitSummary(path):
         ndif2 = freqDif2.shape[0]
         obsSignal = np.zeros(ndif2)
         for i in range(ndif2):
-            obsSignal[i] = freqDif2[i, 4] - sg.smoothComponent(
+            obsSignal[i] = freqDif2[i, 4] - smoothComponent(
                 param[-1, :], 
                 nu=freqDif2[i, 2],
                 npoly_params=npoly_params,
@@ -141,7 +138,7 @@ def plot_fitSummary(path):
             n1 = n2    
 
         xnu = np.linspace(xmin, xmax, 501)
-        modSignal = sg.totalGlitchSignal(xnu, param[-1, :])
+        modSignal = totalGlitchSignal(xnu, param[-1, :])
         plt.plot(xnu, modSignal, '-', lw=2, color=colorList[-1])
 
     else:
@@ -195,7 +192,7 @@ def plot_fitSummary(path):
     ax1 = fig.add_subplot(221)
     ax1.set_rasterization_zorder(-1)
     
-    Ahe, AheNErr, AhePErr = ug.medianAndErrors(Ahe_rln)
+    Ahe, AheNErr, AhePErr = medianAndErrors(Ahe_rln)
     xmin = max(0., Ahe - 10. * AheNErr)
     xmax = Ahe + 10. * AhePErr 
 
@@ -230,7 +227,7 @@ def plot_fitSummary(path):
     ax2 = fig.add_subplot(222)
     ax2.set_rasterization_zorder(-1)
     
-    Dhe, DheNErr, DhePErr = ug.medianAndErrors(param_rln[:, -3])
+    Dhe, DheNErr, DhePErr = medianAndErrors(param_rln[:, -3])
     xmin = max(0., Dhe - 10. * DheNErr)
     xmax = min(acousticRadius, Dhe + 10. * DhePErr)
 
@@ -263,7 +260,7 @@ def plot_fitSummary(path):
     ax3 = fig.add_subplot(223)
     ax3.set_rasterization_zorder(-1)
     
-    The, TheNErr, ThePErr = ug.medianAndErrors(param_rln[:, -2])
+    The, TheNErr, ThePErr = medianAndErrors(param_rln[:, -2])
     xmin = max(0., The - 10. * TheNErr)
     xmax = min(acousticRadius, The + 10. * ThePErr)
 
@@ -342,7 +339,7 @@ def plot_fitSummary(path):
     ax1 = fig.add_subplot(311)
     ax1.set_rasterization_zorder(-1)
     
-    Acz, AczNErr, AczPErr = ug.medianAndErrors(Acz_rln)
+    Acz, AczNErr, AczPErr = medianAndErrors(Acz_rln)
     xmin = max(0., Acz - 10. * AczNErr)
     xmax = Acz + 10. * AczPErr 
 
@@ -380,7 +377,7 @@ def plot_fitSummary(path):
     ax2 = fig.add_subplot(312)
     ax2.set_rasterization_zorder(-1)
     
-    Tcz, TczNErr, TczPErr = ug.medianAndErrors(param_rln[:, -6])
+    Tcz, TczNErr, TczPErr = medianAndErrors(param_rln[:, -6])
     xmin = max(0., Tcz - 10. * TczNErr)
     xmax = min(acousticRadius, Tcz + 10. * TczPErr)
 
@@ -468,7 +465,7 @@ def plot_correlations(cov, filename="./correlations.png"):
 #-----------------------------------------------------------------------------------------
 
     # Compute the correlation matrix
-    cor = ug.correlation_from_covariance(cov)
+    cor = correlation_from_covariance(cov)
     n = cor.shape[0]
     
 

@@ -445,7 +445,7 @@ def loadFit(filename):
 
     # Read the hdf5 file
     with h5py.File(filename, 'r') as data:
-        method = data['header/method'][()]
+        method = data['header/method'][()].decode('utf-8')  # from bytes too utf-8
         npoly_params = data['header/npoly_params'][()]
         nderiv = data['header/nderiv'][()]
         regu_param = data['header/regu_param'][()]

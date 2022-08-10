@@ -2,14 +2,13 @@
 Auxiliary functions for glitch fitting
 '''
 import numpy as np
-from sd import sd
-from icov_sd import icov_sd
-from glitch_fq import fit_fq
-from glitch_sd import fit_sd
-import utils_general as ug
+from .sd import sd
+from .icov_sd import icov_sd
+from .glitch_fq import fit_fq
+from .glitch_sd import fit_sd
 from copy import deepcopy
-
-
+from .utils_general import specific_ratio
+from tqdm import tqdm
 
 #-----------------------------------------------------------------------------------------
 def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None, 
@@ -134,7 +133,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
         param[-1, :] = tmp
         # --> Ratios
         if rtype is not None:
-            _, _, tmp = ug.specific_ratio(freq, rtype=rtype)
+            _, _, tmp = specific_ratio(freq, rtype=rtype)
             ratio = np.zeros((n_rln+1, len(tmp)), dtype=float)
             ratio[-1, :] = tmp
         else:
@@ -143,7 +142,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
         # Fit realizations
         if n_rln > 0:
             freq_rln = deepcopy(freq)
-            for i in range(n_rln):
+            for i in tqdm(range(n_rln)):
                 freq_rln[:, 2] = np.random.normal(loc=freq[:, 2], scale=freq[:, 3])
                 # --> Glitches
                 param[i, :], chi2[i], reg[i], ier[i] = fit_fq(
@@ -163,7 +162,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
                 )
                 # --> Ratios
                 if rtype is not None:
-                    _, _, ratio[i, :] = ug.specific_ratio(freq_rln, rtype=rtype)
+                    _, _, ratio[i, :] = specific_ratio(freq_rln, rtype=rtype)
 
     # Fit second differences
     elif method.lower() == 'sd':
@@ -196,7 +195,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
         param[-1, :] = tmp
         # --> Ratios
         if rtype is not None:
-            _, _, tmp = ug.specific_ratio(freq, rtype=rtype)
+            _, _, tmp = specific_ratio(freq, rtype=rtype)
             ratio = np.zeros((n_rln+1, len(tmp)), dtype=float)
             ratio[-1, :] = tmp
         else:
@@ -205,7 +204,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
         # Fit realizations
         if n_rln > 0:
             freq_rln = deepcopy(freq)
-            for i in range(n_rln):
+            for i in tqdm(range(n_rln)):
                 freq_rln[:, 2] = np.random.normal(loc=freq[:, 2], scale=freq[:, 3])
                 # --> Glitches
                 dif2_rln = sd(freq_rln, num_of_n, num_of_dif2)            
@@ -226,7 +225,7 @@ def fit(freq, num_of_n, delta_nu, num_of_dif2=None, freqDif2=None, icov=None,
                 ) 
                 # --> Ratios
                 if rtype is not None:
-                    _, _, ratio[i, :] = ug.specific_ratio(freq_rln, rtype=rtype)
+                    _, _, ratio[i, :] = specific_ratio(freq_rln, rtype=rtype)
 
     else:
         raise ValueError ("Unrecognized fitting method %s!" %(method))
