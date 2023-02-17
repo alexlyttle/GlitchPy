@@ -1,4 +1,6 @@
-# Acoutic glitches
+# Acoustic glitches
+
+This is a fork of [kuldeepv89/GlitchPy](https://github.com/kuldeepv89/GlitchPy).
 
 This repository can be used to study the glitch signatures arising from the helium ionization zone and the base of convective envelope. Their properties can be extracted following two different approaches:
 
@@ -7,15 +9,31 @@ This repository can be used to study the glitch signatures arising from the heli
 
 The above methods are described in Verma et al. (2019) in some detail (https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.4678V/abstract).
 
-## About
+## Changes
 
-This is forked from [kuldeepv89/GlitchPy](https://github.com/kuldeepv89/GlitchPy). I have added pip-install functionality. These changes were made for me to be able to compare glitch fitting methods easily. I do not intend to change the methods used in this package. If you would like to use this module, see installation instructions below. 
+* Package code into `glitchpy`
+* Add pip-install functionality
+
+## Requirements
+
+* GNU Fortran (GCC 12.2.0)
+* Python (3.6 to 3.11)
 
 ## Installation
 
 To install the latest version of this package to your Python environment, use these commands in your terminal emulator,
 
-```
+```bash
 git clone https://github.com/alexlyttle/GlitchPy.git
 pip install GlitchPy
 ```
+
+## Testing
+
+The test case is the star 16 Cyg A. Run,
+
+```bash
+python 16cyga.py
+```
+
+and check it completes without error.
