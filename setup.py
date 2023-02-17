@@ -35,4 +35,5 @@ setup(
     packages=find_packages(where="src"),
     ext_modules=[glitch_fq, glitch_sd, icov_sd, sd],
     install_requires=["matplotlib", "h5py", "scikit-learn", "seaborn", "tqdm"],
+    python_requires=">=3.6,<3.12",
 )
